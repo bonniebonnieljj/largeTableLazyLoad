@@ -1,0 +1,39 @@
+export function lazyload() {
+    // 获取当前滚动的高度
+    const scrollTop = this.scrollDom.scrollTop;
+    // 根据当前的滚动高度计算出当前可见视口的第一行的index
+    this.currentTopRowIndex = parseInt(scrollTop  / this.rowHeight)
+
+    // 只有数据大于两屏的时候才进行懒加载
+    if(this.currentTopRowIndex > this.preLastRowIndex - this.contentSize) {
+        // 控制滚动高度不可超过最高的滚动高度
+        this.currentScrollTop = Math.min(scrollTop, this.maxScrollTop);
+        // 设置滚动内容的滚动高度
+        this.scrollDom.scrollTop = this.currentScrollTop;
+
+
+        // 内容上滑
+        if(scrollTop > this.preScrollTop){
+            let paddingTop = 0;
+            if(this.currentTopRowIndex > this.bufferSize){
+                // 计算paddingTop
+                paddingTop = scrollTop - this.bufferSize * this.rowHeight;
+                // 计算下一次数据
+                const startIndex = this.currentTopRowIndex - this.bufferSize;
+                const endIndex = this.currentTopRowIndex + this.bufferSize;
+                this.loadArr = this.data.slice(startIndex, endIndex);
+                // 记录最新的数据末尾的index
+                this.preLastRowIndex = endIndex;
+
+            }
+            // 设置paddingBottom  paddingTop  缓冲的remainder
+            const paddingBottom = Math.max(0, this.scrollHeight - this.bufferSize * 2)
+            this.scrollDom.style.paddingTop = paddingTop + 'px'
+            this.scrollDom.style.paddingBottom = paddingBottom + 'px'
+            this.remainder = this.currentScrollTop % this.rowHeight
+            this.scrollDom.style.marginTop = - this.remainder + 'px'
+        } else {
+
+        }
+    }
+}
